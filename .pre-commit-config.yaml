@@ -43,6 +43,35 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+      # 路径声明检查(违反 CLAUDE.md 代码硬规矩 16)
+      # 新文件路径的目录末段必须在 docs/architecture.md 或 docs/test-plan.md 声明
+      - id: path-must-be-declared
+        name: "新文件路径必须在 architecture.md 或 test-plan.md 声明"
+        entry: bash
+        args:
+          - -c
+          - |
+            fails=0
+            new_files=$(git diff --cached --name-only --diff-filter=A 2>/dev/null \
+              | grep -E "^(server|android)/" \
+              | grep -vE "(\.gitkeep|_README\.md)$" || true)
+            for f in $new_files; do
+              dir=$(dirname "$f")
+              last=$(basename "$dir")
+              if ! grep -qF "$last" docs/architecture.md 2>/dev/null \
+                 && ! grep -qF "$last" docs/test-plan.md 2>/dev/null; then
+                echo ""
+                echo "❌ 新文件 $f"
+                echo "   目录末段 '$last' 未在 docs/architecture.md 或 docs/test-plan.md 声明"
+                echo "   → 先去对应文档加这个路径(§模块清单 / §目录结构),再 commit"
+                fails=1
+              fi
+            done
+            exit $fails
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
       # commit message 格式校验(必须 [C_n 状态] 或 [M_n 状态])
       - id: commit-msg-format
         name: "commit message 格式 [C_n|M_n 状态]"

@@ -5,6 +5,7 @@
 > - v1.1 — 代码硬规矩 7 → 15(错误分层 / 副作用 / 事务 / 输入校验 / 依赖门槛 / 修改范围 / 运行环境 / 命名)
 > - v1.2 — 合并第一原则+锁定结论;+ 新会话 SOP / 切片完整性 / commit 格式 / 两锚校验
 > - v1.3 — + 自动化检查节(pre-commit hooks + Claude Code Stop hook)
+> - v1.4 — + 顶层骨架(server/android/deploy 各一份 _README);代码硬规矩 16(架构遵循)+ 配套 hook
 >
 > 每次进入本项目自动加载。这是**我必须遵守的铁律**。详细规则下沉到对应专题文档。本文件硬上限 200 行。
 
@@ -54,7 +55,7 @@
 ## 🪝 自动化检查
 
 人为纪律 + 机械补强,**两层**:
-- **`.pre-commit-config.yaml`**:git commit 前自动跑 — 基础卫生 + 硬编码扫描(Rule 14)+ commit message 格式校验;失败 **block commit**
+- **`.pre-commit-config.yaml`**:git commit 前自动跑 — 基础卫生 + 硬编码扫描(Rule 14)+ **路径声明检查(Rule 16)** + commit message 格式校验;失败 **block commit**
 - **`.claude/settings.json`**:Claude Code 会话结束自动 `git status --short && git log --oneline -5`,触发两锚校验思考
 - 安装见 [README.md §运行](README.md);**待 C1 起补 ruff / mypy / pytest 钩子**(配置文件里已写好,注释保留)
 
@@ -125,6 +126,9 @@
 
 ### 命名约定
 15. **命名约定**:类型后缀固定 `Repository` / `Service` / `ViewModel` / `Dto` / `Dao`;布尔用 `is_*` / `has_*` / `can_*`(Python)、`is*` / `has*` / `can*`(Kotlin);基础风格(snake_case / PascalCase / camelCase)由 `ruff` / `ktlint` 强制
+
+### 架构遵循
+16. **新文件路径必须在 `docs/architecture.md` §模块清单 声明**:写 `server/` 或 `android/` 下新文件前,先确认目标目录已声明;未声明 → 先改 architecture.md(或问用户)再 commit。`.pre-commit-config.yaml` 的 `path-must-be-declared` hook 机械阻止
 
 ---
 
