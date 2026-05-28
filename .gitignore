@@ -1,0 +1,54 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── SQLite(运行时数据,不入库)──
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ── 上传(运行时用户内容,不入库,但保留目录占位)──
+server/uploads/*
+!server/uploads/.gitkeep
+!server/uploads/seed/
+
+# ── 运行时日志 ──
+logs/
+*.log
+
+# ── Android ──
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+android/*.iml
+android/app/*.iml
+android/.cxx/
+
+# ── macOS ──
+.DS_Store
+._*
+
+# ── IDE / 编辑器 ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── 临时 / 备份 ──
+*.bak
+*.tmp
+*~
