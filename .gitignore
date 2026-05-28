@@ -48,6 +48,9 @@ android/.cxx/
 *.swp
 *.swo
 
+# ── Claude Code 个人覆盖(项目级公共配置入库,个人覆盖不入库)──
+.claude/settings.local.json
+
 # ── 临时 / 备份 ──
 *.bak
 *.tmp

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "Claude Code 项目级配置。见 CLAUDE.md「🪝 自动化检查」节。个人覆盖放 .claude/settings.local.json(已 gitignore)。",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '\\n── 当前 git 状态 ──\\n'; git status --short 2>/dev/null || echo '(no git repo)'; printf '\\n── 最近 5 次 commit ──\\n'; git log --oneline -5 2>/dev/null || echo '(no commits)'; printf '\\n'"
+          }
+        ]
+      }
+    ]
+  }
+}

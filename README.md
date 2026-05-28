@@ -116,6 +116,23 @@ cd android && ./gradlew ktlintCheck     # 检查
 
 ---
 
+## 🪝 自动化检查(pre-commit hooks)
+
+一次性安装(每台开发机):
+```bash
+pip install pre-commit
+pre-commit install --hook-type pre-commit --hook-type commit-msg
+```
+
+之后每次 `git commit` 自动检查:
+- 基础卫生(尾空格 / 文件末换行 / 大文件 / 合并冲突 / yaml 合法)
+- **硬编码扫描**(`localhost:` / 用户路径 / 密码字面量) → block(违反 CLAUDE.md Rule 14)
+- **commit message 格式**(`[C_n 状态]` / `[M_n 状态]`)→ block
+
+详见 `.pre-commit-config.yaml` 和 [CLAUDE.md §自动化检查](CLAUDE.md)。
+
+---
+
 ## 🚀 部署
 
 > 待 C11 切片完成后填充。

@@ -2,8 +2,9 @@
 
 > **修订记录**
 > - v1 (2026-05-28) — 初版
-> - v1.1 (2026-05-28) — 代码硬规矩 7 → 15(加错误分层、副作用、事务、输入校验、依赖门槛、修改范围、运行环境、命名约定)
-> - v1.2 (2026-05-28) — 合并第一原则+锁定结论;加新会话 SOP、切片完整性、commit 格式、两锚校验
+> - v1.1 — 代码硬规矩 7 → 15(错误分层 / 副作用 / 事务 / 输入校验 / 依赖门槛 / 修改范围 / 运行环境 / 命名)
+> - v1.2 — 合并第一原则+锁定结论;+ 新会话 SOP / 切片完整性 / commit 格式 / 两锚校验
+> - v1.3 — + 自动化检查节(pre-commit hooks + Claude Code Stop hook)
 >
 > 每次进入本项目自动加载。这是**我必须遵守的铁律**。详细规则下沉到对应专题文档。本文件硬上限 200 行。
 
@@ -29,24 +30,16 @@
 
 ## ⚖️ 两锚校验铁律
 
-状态靠**两个独立事实之锚**:
-1. `git log` commit 状态(开工 / wip / done)
-2. `docs/story-map.md` 故事状态(⏳ / 🟡 / ✅)
-
-**两锚必须一致**。不一致 → 停下问用户,落 `drift-log.md`。
+两个独立事实之锚:`git log` commit 状态(开工/wip/done) + `docs/story-map.md` 故事状态(⏳/🟡/✅)。
+**两锚必须一致**;不一致 → 停 + 问用户 + 落 `drift-log.md`。
 
 ---
 
 ## 💾 commit message 强制格式
 
-`[C_n <状态>] <描述> (<故事 ID>)`,状态 ∈ {`开工`, `wip`, `done`}。
-
-例:
-- `[C3 开工] start categories CRUD (US-ADMIN-03)`
-- `[C3 wip]  domain + repository layers done (US-ADMIN-03)`
-- `[C3 done] categories CRUD with admin + API (US-ADMIN-03)`
-
-里程碑用 `M_n`:`[M0 done] initial docs scaffold`、`[M1 done] backend skeleton + admin login (C1, C2)`。
+`[C_n <状态>] <描述> (<故事 ID>)`,状态 ∈ {`开工`, `wip`, `done`};里程碑用 `[M_n <状态>]`。
+例:`[C3 done] categories CRUD (US-ADMIN-03)` / `[M0 done] initial docs scaffold`。
+**`.pre-commit-config.yaml` 自动校验格式**;不合规 commit 物理无法落地。
 
 ---
 
@@ -55,6 +48,15 @@
 - **禁止半成品过夜**:切片未达 [DoD 7 条](docs/delivery-process.md) 不允许 `commit -m "[C_n done]"`
 - 会话末要么 `done` 要么 `wip` 要么 `git stash`
 - **不允许**未 commit 的本地改动跨会话遗留
+
+---
+
+## 🪝 自动化检查
+
+人为纪律 + 机械补强,**两层**:
+- **`.pre-commit-config.yaml`**:git commit 前自动跑 — 基础卫生 + 硬编码扫描(Rule 14)+ commit message 格式校验;失败 **block commit**
+- **`.claude/settings.json`**:Claude Code 会话结束自动 `git status --short && git log --oneline -5`,触发两锚校验思考
+- 安装见 [README.md §运行](README.md);**待 C1 起补 ruff / mypy / pytest 钩子**(配置文件里已写好,注释保留)
 
 ---
 

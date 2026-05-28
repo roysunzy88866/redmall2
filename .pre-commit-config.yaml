@@ -1,0 +1,93 @@
+# .pre-commit-config.yaml · 提交前自动检查
+#
+# 一次性安装(每个开发机器):
+#   pip install pre-commit
+#   pre-commit install --hook-type pre-commit --hook-type commit-msg
+#
+# 见 CLAUDE.md「🪝 自动化检查」节。
+
+repos:
+  # ── 基础卫生 ──
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=2048']
+      - id: check-case-conflict
+
+  # ── 项目专属检查 ──
+  - repo: local
+    hooks:
+      # 阻止硬编码(违反 CLAUDE.md 代码硬规矩 14)
+      - id: no-hard-coded-secrets
+        name: "硬编码检查 (localhost / 用户路径 / 密码)"
+        entry: bash
+        args:
+          - -c
+          - |
+            if grep -rEn "(localhost:[0-9]{4,5}|/Users/[A-Za-z]+/[A-Za-z]+/|Ridemall@Demo2026|password\s*=\s*[\"'][^\"']{3,})" \
+                --include="*.py" --include="*.kt" \
+                --exclude-dir=".venv" --exclude-dir="build" \
+                --exclude-dir="node_modules" --exclude-dir=".gradle" \
+                . 2>/dev/null; then
+              echo ""
+              echo "❌ 发现硬编码,违反 CLAUDE.md 代码硬规矩 14"
+              echo "   请走配置:env / config.py / BuildConfig"
+              exit 1
+            fi
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # commit message 格式校验(必须 [C_n 状态] 或 [M_n 状态])
+      - id: commit-msg-format
+        name: "commit message 格式 [C_n|M_n 状态]"
+        entry: bash
+        args:
+          - -c
+          - |
+            msg=$(head -1 "$1")
+            if echo "$msg" | grep -qE "^\[(C[0-9]+|M[0-9]+) (开工|wip|done)\]"; then
+              exit 0
+            else
+              echo ""
+              echo "❌ commit message 第一行必须以 [C_n 状态] 或 [M_n 状态] 开头"
+              echo "   状态枚举:开工 / wip / done"
+              echo "   例:[C3 done] categories CRUD (US-ADMIN-03)"
+              echo "      [M0 done] initial docs scaffold"
+              exit 1
+            fi
+        language: system
+        stages: [commit-msg]
+
+# ── 待 C1 上线后启用(取消注释)──
+#
+# Python lint + format(server/ 有 .py 文件后)
+#   - repo: https://github.com/astral-sh/ruff-pre-commit
+#     rev: v0.6.0
+#     hooks:
+#       - id: ruff
+#         args: [--fix]
+#       - id: ruff-format
+#
+# Python 类型检查(strict mode)
+#   - repo: https://github.com/pre-commit/mirrors-mypy
+#     rev: v1.11.0
+#     hooks:
+#       - id: mypy
+#         args: [--strict, --ignore-missing-imports]
+#         additional_dependencies: [flask, sqlalchemy, types-werkzeug]
+#
+# pytest 快速冒烟(server/tests/ 有内容后)
+#   - repo: local
+#     hooks:
+#       - id: pytest-quick
+#         name: pytest 快速冒烟
+#         entry: bash -c "cd server && python -m pytest -q --timeout=10"
+#         language: system
+#         pass_filenames: false
+#         stages: [pre-commit]
