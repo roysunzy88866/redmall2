@@ -124,6 +124,8 @@ repos:
               echo "   当前:$msg"
               exit 1
             fi
+          # 占位 $0,使 pre-commit 追加的 commit-msg 文件名落到 $1
+          - "_hook"
         language: system
         stages: [commit-msg]
 
@@ -157,6 +159,7 @@ repos:
             echo "   改动的代码文件:"
             echo "$code_changed" | sed 's/^/     /'
             exit 1
+          - "_hook"
         language: system
         stages: [commit-msg]
 
@@ -179,6 +182,7 @@ repos:
                 exit 1
               fi
             fi
+          - "_hook"
         language: system
         stages: [commit-msg]
 
@@ -199,6 +203,7 @@ repos:
                 exit 1
               fi
             fi
+          - "_hook"
         language: system
         stages: [commit-msg]
 
