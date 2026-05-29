@@ -1,6 +1,6 @@
 # 车载商店 02(Ridemall Demo)
 
-> 车载横屏 1920×720 上的购物 demo + 后端商品管理后台。**内部演示性质**,不接真实支付,不做物流。
+> 车载横屏 1920×1080(16:9)上的购物 demo + 后端商品管理后台。**内部演示性质**,不接真实支付,不做物流。
 > 完整范围与边界:[需求共识.md](需求共识.md)
 
 ---
@@ -26,6 +26,12 @@
 | 文档 | 作用 |
 |---|---|
 | [docs/adr/](docs/adr/) | 架构决策记录(每决策一文件,Status 字段) |
+
+### 设计 / 原型(⏳ 有保质期,设计稿出现即归档)
+| 文档 | 作用 |
+|---|---|
+| [docs/prototype-wireframes.md](docs/prototype-wireframes.md) | 车机端低保真 ASCII 线框(只表达结构/交互,**非视觉**) |
+| [docs/design-brief.md](docs/design-brief.md) | 给 Claude design / 设计师的交接包(派生件,可复制即用) |
 
 ### 惰性创建(出现时才有)
 - `docs/api.md` — C3 上线第一个 API 时创建

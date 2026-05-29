@@ -10,4 +10,6 @@
 
 <!-- 在此线下方写 WIP 条目;无条目 = 干净,可正常开新切片 -->
 
-(暂无 WIP。状态干净。)
+<!-- 干净:2026-05-29 车机端 UI/IA 原型已定稿并全部落盘
+     (prototype-wireframes.md + ADR-0004 + 需求共识.md + user-stories.md US-CAR-01~07 + story-map.md)。
+     无半成品遗留,可正常开新切片。 -->
