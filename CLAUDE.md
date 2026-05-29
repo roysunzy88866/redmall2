@@ -60,7 +60,7 @@
 ## 🪝 自动化检查
 
 人为纪律 + 机械补强,**两层**:
-- **`.pre-commit-config.yaml`**:commit 前自动跑 — 基础卫生 + 硬编码扫描(Rule 14)+ 路径白名单(Rule 16,`docs/.path-whitelist` 整行匹配)+ architecture 改动强制 bump + commit 格式 + **C_n 必带故事 ID**;失败 **block commit**
+- **`.pre-commit-config.yaml`**:commit 前自动跑 — 基础卫生 + 硬编码扫描(Rule 14)+ 路径白名单(Rule 16,`docs/.path-whitelist` 整行匹配)+ architecture 改动强制 bump + commit 格式 + **C_n 必带故事 ID** + **代码⟹文档闸门**(改 `server/`·`android/` 的 `.py`/`.kt` 必须同提交带 `.md`,否则 message 写 `[doc-skip: 原因]`)+ **两锚同步闸门**(`[C_n 开工|done]` 必带 `docs/story-map.md`;`[C_n done]` 还须带 `docs/wip.md`);失败 **block commit**
 - **`.claude/settings.json`**:会话结束自动 `git status --short && git log --oneline -5`,作为两锚校验的**输入**(打印,非阻断)
 - 安装见 [README.md §运行](README.md);**待 C1 起补 ruff / mypy / pytest 钩子**(配置已写好,注释保留)
 

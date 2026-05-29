@@ -133,7 +133,11 @@ pre-commit install --hook-type pre-commit --hook-type commit-msg
 之后每次 `git commit` 自动检查:
 - 基础卫生(尾空格 / 文件末换行 / 大文件 / 合并冲突 / yaml 合法)
 - **硬编码扫描**(`localhost:` / 用户路径 / 密码字面量) → block(违反 CLAUDE.md Rule 14)
-- **commit message 格式**(`[C_n 状态]` / `[M_n 状态]`)→ block
+- **路径声明**(新文件目录必须在 `docs/.path-whitelist`)→ block(Rule 16)
+- **architecture 改动**(改正文必须 bump 修订记录)→ block
+- **commit message 格式**(`[C_n 状态]` / `[M_n 状态]`,C_n 必带故事 ID)→ block
+- **代码⟹文档**(改 `server/`·`android/` 的 `.py`/`.kt` 必须同提交带 `.md`,否则 message 写 `[doc-skip: 原因]`)→ block
+- **两锚同步**(`[C_n 开工\|done]` 必须同提交带 `docs/story-map.md`;`[C_n done]` 还须带 `docs/wip.md`)→ block
 
 详见 `.pre-commit-config.yaml` 和 [CLAUDE.md §自动化检查](CLAUDE.md)。
 

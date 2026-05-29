@@ -127,6 +127,81 @@ repos:
         language: system
         stages: [commit-msg]
 
+      # 代码 ⟹ 文档 闸门(补 CLAUDE.md「文档同步」的机械缺口)
+      # 改了 server/ 或 android/ 的 .py/.kt,本次提交里必须同时有 .md,
+      # 否则 block;确属无需改文档的提交,在 message 写 [doc-skip: 原因] 豁免。
+      - id: code-requires-doc
+        name: "改代码必须同提交带文档(否则 [doc-skip: 原因])"
+        entry: bash
+        args:
+          - -c
+          - |
+            msg=$(head -1 "$1")
+            # 豁免:message 显式声明 [doc-skip: 原因]
+            if echo "$msg" | grep -qE "\[doc-skip:[^]]+\]"; then
+              exit 0
+            fi
+            staged=$(git diff --cached --name-only 2>/dev/null || true)
+            code_changed=$(echo "$staged" | grep -E "^(server|android)/.*\.(py|kt)$" || true)
+            if [ -z "$code_changed" ]; then
+              exit 0
+            fi
+            doc_changed=$(echo "$staged" | grep -E "\.md$" || true)
+            if [ -n "$doc_changed" ]; then
+              exit 0
+            fi
+            echo ""
+            echo "❌ 本次提交改了代码(server/ 或 android/ 的 .py/.kt)但没有同提交的文档(.md)"
+            echo "   CLAUDE.md「文档同步」要求 API/架构/行为变更同提交更新文档"
+            echo "   → 要么补上相应 .md;要么确属无需文档的提交,在 message 写 [doc-skip: 原因]"
+            echo "   改动的代码文件:"
+            echo "$code_changed" | sed 's/^/     /'
+            exit 1
+        language: system
+        stages: [commit-msg]
+
+      # 两锚校验闸门(把 CLAUDE.md「两锚一致」从人为纪律变机械阻断)
+      # [C_n 开工] / [C_n done] 必须同提交带 docs/story-map.md(故事状态锚同步)
+      - id: slice-state-needs-storymap
+        name: "[C_n 开工|done] 必须同提交更新 story-map.md"
+        entry: bash
+        args:
+          - -c
+          - |
+            msg=$(head -1 "$1")
+            if echo "$msg" | grep -qE "^\[C[0-9]+ (开工|done)\]"; then
+              staged=$(git diff --cached --name-only 2>/dev/null || true)
+              if ! echo "$staged" | grep -qxF "docs/story-map.md"; then
+                echo ""
+                echo "❌ [C_n 开工|done] 提交必须同时更新 docs/story-map.md(两锚:故事状态)"
+                echo "   开工 → 故事置 🟡;done → 故事置 ✅"
+                echo "   当前:$msg"
+                exit 1
+              fi
+            fi
+        language: system
+        stages: [commit-msg]
+
+      # [C_n done] 必须同提交带 docs/wip.md(切片完整性:无遗留半成品)
+      - id: done-needs-clean-wip
+        name: "[C_n done] 必须同提交更新 wip.md"
+        entry: bash
+        args:
+          - -c
+          - |
+            msg=$(head -1 "$1")
+            if echo "$msg" | grep -qE "^\[C[0-9]+ done\]"; then
+              staged=$(git diff --cached --name-only 2>/dev/null || true)
+              if ! echo "$staged" | grep -qxF "docs/wip.md"; then
+                echo ""
+                echo "❌ [C_n done] 提交必须同时更新 docs/wip.md(切片完整性:清掉本片遗留条目)"
+                echo "   当前:$msg"
+                exit 1
+              fi
+            fi
+        language: system
+        stages: [commit-msg]
+
 # ── 待 C1 上线后启用(取消注释)──
 #
 # Python lint + format(server/ 有 .py 文件后)
