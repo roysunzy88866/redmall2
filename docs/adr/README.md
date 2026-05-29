@@ -37,6 +37,16 @@
 
 ---
 
+## 🏷 Tags 受控词表(只能从下表选,不许新造)
+
+防止同义词散开(`backend` / `server` / `flask` 指同一件事却搜不到一起):
+
+`architecture` · `backend` · `android` · `deployment` · `process` · `testing` · `security` · `naming` · `governance`
+
+需要新 tag → 先在此表加,再用。
+
+---
+
 ## 📐 模板
 
 复制下方模板到新 ADR 文件:
@@ -46,7 +56,7 @@
 
 - **Status**: Proposed / Accepted / Superseded by ADR-XXXX / Deprecated
 - **Date**: YYYY-MM-DD
-- **Tags**: architecture / backend / android / deployment / process / ...
+- **Tags**: (从受控词表选,逗号分隔)
 
 ## 背景 Context
 为什么要做这个决策?遇到了什么问题?当时已知的约束有哪些?

@@ -23,13 +23,14 @@ repos:
   - repo: local
     hooks:
       # 阻止硬编码(违反 CLAUDE.md 代码硬规矩 14)
+      # 只抓具体危险字面值,不抓 `password = ...`(会误伤正常表单字段)
       - id: no-hard-coded-secrets
-        name: "硬编码检查 (localhost / 用户路径 / 密码)"
+        name: "硬编码检查 (localhost:端口 / 用户路径 / 演示密码)"
         entry: bash
         args:
           - -c
           - |
-            if grep -rEn "(localhost:[0-9]{4,5}|/Users/[A-Za-z]+/[A-Za-z]+/|Ridemall@Demo2026|password\s*=\s*[\"'][^\"']{3,})" \
+            if grep -rEn "(localhost:[0-9]{4,5}|/Users/[A-Za-z]+/[A-Za-z]+/|Ridemall@Demo2026)" \
                 --include="*.py" --include="*.kt" \
                 --exclude-dir=".venv" --exclude-dir="build" \
                 --exclude-dir="node_modules" --exclude-dir=".gradle" \
@@ -44,26 +45,53 @@ repos:
         stages: [pre-commit]
 
       # 路径声明检查(违反 CLAUDE.md 代码硬规矩 16)
-      # 新文件路径的目录末段必须在 docs/architecture.md 或 docs/test-plan.md 声明
+      # 新文件所在目录必须**精确**出现在 docs/.path-whitelist(整行匹配),
+      # 不再用子串撞名;android res/ 框架目录特例放行。
       - id: path-must-be-declared
-        name: "新文件路径必须在 architecture.md 或 test-plan.md 声明"
+        name: "新文件目录必须在 docs/.path-whitelist 声明"
         entry: bash
         args:
           - -c
           - |
             fails=0
+            wl="docs/.path-whitelist"
             new_files=$(git diff --cached --name-only --diff-filter=A 2>/dev/null \
-              | grep -E "^(server|android)/" \
+              | grep -E "^(server|android|deploy)/" \
               | grep -vE "(\.gitkeep|_README\.md)$" || true)
             for f in $new_files; do
               dir=$(dirname "$f")
-              last=$(basename "$dir")
-              if ! grep -qF "$last" docs/architecture.md 2>/dev/null \
-                 && ! grep -qF "$last" docs/test-plan.md 2>/dev/null; then
+              case "$dir" in
+                android/app/src/main/res*) continue ;;  # Gradle 框架资源目录,放行
+              esac
+              if grep -vE '^[[:space:]]*(#|$)' "$wl" | grep -qxF "$dir"; then
+                continue
+              fi
+              echo ""
+              echo "❌ 新文件 $f"
+              echo "   目录 '$dir' 不在 docs/.path-whitelist"
+              echo "   → 先在 .path-whitelist 加一行 '$dir' + 同步 docs/architecture/ 分册,再 commit"
+              fails=1
+            done
+            exit $fails
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # architecture 文档改了正文 → 修订记录必须 bump(违反则 block)
+      - id: architecture-revision-bump
+        name: "改 architecture 文档必须更新修订记录"
+        entry: bash
+        args:
+          - -c
+          - |
+            fails=0
+            changed=$(git diff --cached --name-only --diff-filter=M 2>/dev/null \
+              | grep -E "^docs/architecture(/[a-z]+)?\.md$" || true)
+            for f in $changed; do
+              if ! git diff --cached "$f" | grep -qE "^\+.*[Vv][0-9]+(\.[0-9]+)?"; then
                 echo ""
-                echo "❌ 新文件 $f"
-                echo "   目录末段 '$last' 未在 docs/architecture.md 或 docs/test-plan.md 声明"
-                echo "   → 先去对应文档加这个路径(§模块清单 / §目录结构),再 commit"
+                echo "❌ $f 改了正文但修订记录没 bump"
+                echo "   → 在文件顶部「修订记录」加一行新版本号"
                 fails=1
               fi
             done
@@ -80,14 +108,20 @@ repos:
           - -c
           - |
             msg=$(head -1 "$1")
-            if echo "$msg" | grep -qE "^\[(C[0-9]+|M[0-9]+) (开工|wip|done)\]"; then
-              exit 0
-            else
+            if ! echo "$msg" | grep -qE "^\[(C[0-9]+|M[0-9]+) (开工|wip|done)\]"; then
               echo ""
               echo "❌ commit message 第一行必须以 [C_n 状态] 或 [M_n 状态] 开头"
               echo "   状态枚举:开工 / wip / done"
               echo "   例:[C3 done] categories CRUD (US-ADMIN-03)"
               echo "      [M0 done] initial docs scaffold"
+              exit 1
+            fi
+            # C_n 切片 commit 必须带故事 ID;M_n 里程碑 commit 豁免
+            if echo "$msg" | grep -qE "^\[C[0-9]+ " \
+               && ! echo "$msg" | grep -qE "\(US-[A-Z]+-[0-9]+"; then
+              echo ""
+              echo "❌ C_n 切片 commit 必须带故事 ID,如 (US-ADMIN-03)"
+              echo "   当前:$msg"
               exit 1
             fi
         language: system

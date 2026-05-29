@@ -1,6 +1,6 @@
 # User Stories · 验收场景(Gherkin)
 
-> 14 个用户故事的 **Gherkin 验收场景**。
+> 15 个用户故事的 **Gherkin 验收场景**。
 > 故事列表 / 优先级 / 状态在 [story-map.md](story-map.md)。
 > **JIT 增长**:切片开工时填充对应故事的场景,**开工前为空**。
 >

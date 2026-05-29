@@ -1,0 +1,49 @@
+# 路径白名单(机器可读)· pre-commit 的 path-must-be-declared hook 用它判定新文件目录是否合法
+#
+# 规则:新增 server/ android/ deploy/ 下的文件,其所在目录必须**精确**出现在下方列表(整行匹配)。
+# 例外:android/app/src/main/res/ 及其子目录(Gradle 框架资源)由 hook 特例放行,不在此列举。
+# 新增模块时:在此加一行 + 同步 docs/architecture/ 对应分册。
+# # 开头的行和空行被忽略。
+
+# ── 后端 server/ ──
+server
+server/domain
+server/models
+server/repositories
+server/services
+server/views
+server/views/api
+server/views/admin
+server/views/admin/templates
+server/static
+server/uploads
+server/uploads/seed
+server/scripts
+server/tests
+server/tests/unit
+server/tests/unit/domain
+server/tests/unit/repositories
+server/tests/unit/services
+server/tests/unit/util
+server/tests/integration
+server/tests/e2e
+
+# ── 车机端 android/(java 包;res/ 框架目录由 hook 特例放行)──
+android
+android/app
+android/app/src
+android/app/src/main
+android/app/src/main/java/space/hearagain/ridemall
+android/app/src/main/java/space/hearagain/ridemall/data
+android/app/src/main/java/space/hearagain/ridemall/data/dto
+android/app/src/main/java/space/hearagain/ridemall/data/model
+android/app/src/main/java/space/hearagain/ridemall/data/api
+android/app/src/main/java/space/hearagain/ridemall/data/repository
+android/app/src/main/java/space/hearagain/ridemall/viewmodel
+android/app/src/main/java/space/hearagain/ridemall/ui
+android/app/src/main/java/space/hearagain/ridemall/util
+android/app/src/test
+android/app/src/androidTest
+
+# ── 部署 deploy/ ──
+deploy

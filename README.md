@@ -17,7 +17,7 @@
 ### 测试驱动核心
 | 文档 | 作用 |
 |---|---|
-| [docs/story-map.md](docs/story-map.md) | 14 个用户故事 ID + 优先级 + 状态 |
+| [docs/story-map.md](docs/story-map.md) | 15 个用户故事 ID + 优先级 + 状态 |
 | [docs/user-stories.md](docs/user-stories.md) | 每故事的 Gherkin 验收场景(JIT 增长) |
 | [docs/test-plan.md](docs/test-plan.md) | 测试金字塔 + 工具 + 命名 + 覆盖率仪表盘 |
 | [docs/delivery-process.md](docs/delivery-process.md) | DoD + 给用户反馈姿势 + 实施节奏 |

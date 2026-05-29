@@ -6,6 +6,7 @@
 > - v1.2 — 合并第一原则+锁定结论;+ 新会话 SOP / 切片完整性 / commit 格式 / 两锚校验
 > - v1.3 — + 自动化检查节(pre-commit hooks + Claude Code Stop hook)
 > - v1.4 — + 顶层骨架(server/android/deploy 各一份 _README);代码硬规矩 16(架构遵循)+ 配套 hook
+> - v1.5 — 审计修复:SOP 加 wip + Gherkin 步;Rule 16 改路径白名单;architecture 拆分册;+ 故事 ID / 架构 bump hook
 >
 > 每次进入本项目自动加载。这是**我必须遵守的铁律**。详细规则下沉到对应专题文档。本文件硬上限 200 行。
 
@@ -23,9 +24,10 @@
 
 用户开会话只需一个字 "嗯" 或直接动作。我**自动**:
 1. 跑 `git log --oneline -20` 看上次到哪
-2. 读 `docs/story-map.md` 校验切片 / 故事状态
-3. 两锚一致 → 提议「上次完成 C_n,下一片 C_{n+1}(US-XXX-NN),开始?」
-4. 两锚不一致 → 停下问用户,在 `docs/drift-log.md` 登记 reconcile
+2. `cat docs/wip.md` 看有无跨会话半成品遗留
+3. 读 `docs/story-map.md` 校验切片 / 故事状态
+4. 两锚一致 → 提议「上次完成 C_n,下一片 C_{n+1}(US-XXX-NN),开始?」;不一致 → 停下问用户,登记 `drift-log.md`
+5. 用户拍板后:**先在 `docs/user-stories.md` 补本片 Gherkin → 用户二次确认 → 才进红绿循环**(禁止跳过直接写代码)
 
 ---
 
@@ -55,9 +57,9 @@
 ## 🪝 自动化检查
 
 人为纪律 + 机械补强,**两层**:
-- **`.pre-commit-config.yaml`**:git commit 前自动跑 — 基础卫生 + 硬编码扫描(Rule 14)+ **路径声明检查(Rule 16)** + commit message 格式校验;失败 **block commit**
-- **`.claude/settings.json`**:Claude Code 会话结束自动 `git status --short && git log --oneline -5`,触发两锚校验思考
-- 安装见 [README.md §运行](README.md);**待 C1 起补 ruff / mypy / pytest 钩子**(配置文件里已写好,注释保留)
+- **`.pre-commit-config.yaml`**:commit 前自动跑 — 基础卫生 + 硬编码扫描(Rule 14)+ 路径白名单(Rule 16,`docs/.path-whitelist` 整行匹配)+ architecture 改动强制 bump + commit 格式 + **C_n 必带故事 ID**;失败 **block commit**
+- **`.claude/settings.json`**:会话结束自动 `git status --short && git log --oneline -5`,作为两锚校验的**输入**(打印,非阻断)
+- 安装见 [README.md §运行](README.md);**待 C1 起补 ruff / mypy / pytest 钩子**(配置已写好,注释保留)
 
 ---
 
@@ -128,7 +130,7 @@
 15. **命名约定**:类型后缀固定 `Repository` / `Service` / `ViewModel` / `Dto` / `Dao`;布尔用 `is_*` / `has_*` / `can_*`(Python)、`is*` / `has*` / `can*`(Kotlin);基础风格(snake_case / PascalCase / camelCase)由 `ruff` / `ktlint` 强制
 
 ### 架构遵循
-16. **新文件路径必须在 `docs/architecture.md` §模块清单 声明**:写 `server/` 或 `android/` 下新文件前,先确认目标目录已声明;未声明 → 先改 architecture.md(或问用户)再 commit。`.pre-commit-config.yaml` 的 `path-must-be-declared` hook 机械阻止
+16. **新文件目录必须在 `docs/.path-whitelist` 声明**(机器可读)+ 在 `docs/architecture/` 对应分册有人话说明:写 `server/` `android/` `deploy/` 下新文件前先确认目录已登记;未登记 → 先加白名单 + 改分册再 commit。`path-must-be-declared` hook **整行精确匹配**机械阻止(android `res/` 框架目录特例放行)
 
 ---
 
@@ -154,7 +156,7 @@
 | 用户讨论需求 / 范围被确认 | `需求共识.md`(用户明文授权)+ 同提交记 ADR |
 | 技术 / 架构决策被确认 | `docs/adr/0NNN-*.md` |
 | API 改动 | `docs/api.md`(同提交) |
-| 新模块 / 边界变化 / 数据流变化 | `docs/architecture.md`(同提交,超 150 行强制拆) |
+| 新模块 / 边界变化 / 数据流变化 | `docs/architecture/` 对应分册 + `docs/.path-whitelist`(同提交) |
 | 用户故事 / 验收场景新增 | `docs/story-map.md` + `docs/user-stories.md` |
 | 越界事件(主动或无意) | `docs/drift-log.md`(惰性创建) |
 | 临时方案 / 妥协 | `docs/tech-debt.md`(惰性创建) |
@@ -187,6 +189,6 @@
 ## ⚠️ 防膨胀触发(3 核心 · 详见 [architecture.md](docs/architecture.md))
 
 任一触发 → 强制拆:
-1. 本文件 > 200 行 / `architecture.md` > 150 行
+1. 本文件 > 200 行 / `architecture.md` 总览 > 80 行 / 任一架构分册 > 150 行
 2. 新人 onboard > 15 分钟还没看懂
 3. 频繁需要横向引用 3+ ADR 才能解释一个问题
